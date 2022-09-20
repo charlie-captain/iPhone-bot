@@ -49,10 +49,10 @@ func LoadEnv() {
 	log.Log.Println("loadEnv")
 	pwd, _ := os.Getwd()
 	log.Log.Println(pwd)
-	env := pwd + "/.env"
+	env := pwd + "/env"
 	err := godotenv.Load(env)
 	if err != nil {
-		log.Log.Fatalf("unable to load .env file")
+		log.Log.Fatalf("unable to load env file")
 	}
 	MyId, _ = strconv.ParseInt(os.Getenv("MY_ID"), 10, 64)
 	Url = os.Getenv("URL")
