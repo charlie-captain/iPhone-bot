@@ -182,16 +182,21 @@ func fetch() {
 		//log.Log.Println(string(partsAvailability))
 		if err != nil || len(partsAvailability) == 2 || len(partsAvailability) == 0 {
 			clearStore(storeNumStr)
+			isFetching = false
 			return
 		}
 		hasModelList := []Model{}
 		jsonparser.ObjectEach(value, func(key, value []byte, dataType jsonparser.ValueType, offset int) error {
-			title, err := jsonparser.GetUnsafeString(value, "storePickupProductTitle")
+			messageValue, _, _, err := jsonparser.Get(value, "messageTypes", "regular")
+			if err != nil {
+				log.Log.Error(err)
+				return err
+			}
+			title, err := jsonparser.GetUnsafeString(messageValue, "storePickupProductTitle")
 			if err != nil {
 				log.Log.Println(err)
 				return err
 			}
-			title = strings.TrimSpace(title)
 			available, err := jsonparser.GetUnsafeString(value, "pickupDisplay")
 			if err != nil {
 				log.Log.Println(err)
@@ -208,6 +213,7 @@ func fetch() {
 
 		if len(hasModelList) == 0 {
 			clearStore(storeNumStr)
+			isFetching = false
 			return
 		}
 
@@ -326,8 +332,10 @@ func clearStore(storeNumStr string) bool {
 	cacheModels := cacheStore.Models
 	if len(cacheModels) > 0 {
 		for _, model := range cacheModels {
-			notifyChannel(true, model)
-			model.Enable = false
+			if model.Enable {
+				notifyChannel(true, model)
+				model.Enable = false
+			}
 		}
 		cacheStore.Models = []Model{}
 		log.Log.Println(cacheModels)
