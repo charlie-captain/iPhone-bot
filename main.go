@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"iphoneBot/log"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -25,6 +26,7 @@ var bot *tb.Bot
 var isFetching = false
 var cronTask *cron.Cron
 var FetchTime = "3s"
+var Proxy = ""
 var storeMap = map[string]Store{}
 
 type Store struct {
@@ -48,7 +50,6 @@ type Model struct {
 func LoadEnv() {
 	log.Log.Println("loadEnv")
 	pwd, _ := os.Getwd()
-	log.Log.Println(pwd)
 	env := pwd + "/env"
 	err := godotenv.Load(env)
 	if err != nil {
@@ -58,9 +59,7 @@ func LoadEnv() {
 	Url = os.Getenv("URL")
 	Token = os.Getenv("BOT_TOKEN")
 	FetchTime = os.Getenv("FETCH_DURATION")
-	log.Log.Println(Token)
-	log.Log.Println(MyId)
-	log.Log.Println(Url)
+	Proxy = os.Getenv("PROXY")
 }
 
 func main() {
@@ -122,6 +121,17 @@ func fetch() {
 	isFetching = true
 	log.Log.Println(fmt.Sprintf("start fetch %v", time.Now().Local()))
 	h := http.DefaultClient
+
+	if len(Proxy) > 0 {
+		proxyUrl, err := url.Parse(Proxy)
+		if err != nil {
+			log.Log.Error(err)
+			return
+		}
+		h.Transport = &http.Transport{
+			Proxy: http.ProxyURL(proxyUrl),
+		}
+	}
 	h.Timeout = 2 * time.Second
 	req, err := http.NewRequest(http.MethodGet, Url, nil)
 	if err != nil {

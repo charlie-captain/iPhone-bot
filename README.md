@@ -1,9 +1,11 @@
 # iPhone-bot
+
 iPhone 14 Pro Telegram Bot, 默认城市 GuangZhou.
 
 ## Usage
 
-1. .env edit
+1. env 编辑
+
 ```
 # 机器人TOKEN
 BOT_TOKEN=xxx
@@ -16,10 +18,18 @@ URL=https://www.apple.com.cn/shop/pickup-message-recommendations?mt=compact&sear
 
 # 查询间隔时间 3s/1min/1h
 FETCH_DURATION=3s
+
+# 代理地址:端口(例 http://127.0.0.1:7890), 默认为系统代理
+PROXY=
 ```
 
-2. run program
+2. 运行程序
 
+```
+windows 运行 iphoneBot.exe
+
+linux/Mac 运行 iphoneBot, 需要命令行设置权限 chmod +x ./iphoneBot
+```
 
 ## Q & A
 
