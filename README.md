@@ -23,12 +23,19 @@ FETCH_DURATION=3s
 PROXY=
 ```
 
-2. 运行程序
+2. 本地运行程序
 
 ```
 windows 运行 iphoneBot.exe
 
 linux/Mac 运行 iphoneBot, 需要命令行设置权限 chmod +x ./iphoneBot
+```
+
+3. Docker部署
+```
+    //命令行运行
+    chmod +777 ./run_docker.sh 
+    ./run_docker.sh
 ```
 
 ## Q & A
