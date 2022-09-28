@@ -1,0 +1,10 @@
+{
+  "bot_token": "xxxxxx",
+  "chat_id": 111111,
+  "store_list": [
+    "R577",
+    "R639"
+  ],
+  "fetch_duration": "3s",
+  "proxy": ""
+}
