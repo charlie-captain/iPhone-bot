@@ -5,6 +5,8 @@
     "R577",
     "R639"
   ],
+  "model_list": [
+  ],
   "fetch_duration": "3s",
   "proxy": ""
 }

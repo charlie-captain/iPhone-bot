@@ -20,6 +20,11 @@ iPhone Pro Telegram Bot, 默认城市 GuangZhou.
     "R639"
   ],
   
+  # 监听的型号代号, 从iPhone购买页面地址获取, 默认空则为 Pro + Pro Max(不建议超过3个)
+  "model_list": [
+    
+  ],
+  
   # 查询间隔时间 3s/1min/1h
   "fetch_duration": "3s",
   

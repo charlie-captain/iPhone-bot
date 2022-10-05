@@ -3,8 +3,9 @@ package model
 import "time"
 
 type FetchSource struct {
-	Url  string
-	Type []string
+	Url         string
+	Type        []string
+	ExactlyMode bool //精确模式, 适合指定机型
 }
 
 type Store struct {

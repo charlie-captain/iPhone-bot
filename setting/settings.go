@@ -16,10 +16,12 @@ type Settings struct {
 	FetchDuration string             `json:"fetch_duration"`
 	Proxy         string             `json:"proxy"`
 	FetchSource   *model.FetchSource `json:"-"`
+	Models        []string           `json:"model_list"`
 }
 
-const IPhoneProUrl = "https://www.apple.com.cn/shop/pickup-message-recommendations?t=compact&searchNearby=true&store=%s&product="
-const IPhoneProBuyUrl = "https://www.apple.com.cn/shop/buy-iphone/"
+const IPhoneUrl = "https://www.apple.com.cn/shop/pickup-message-recommendations?t=compact&searchNearby=true&store=%s&product="
+const IPhoneModelUrl = "https://www.apple.com.cn/shop/fulfillment-messages?store=%s&little=false&parts.0=%s&mts.0=regular&mts.1=sticky&fts=true&searchNearby=true"
+const IPhoneBuyUrl = "https://www.apple.com.cn/shop/buy-iphone/"
 const CurIPhone = "iphone-14-pro"
 
 const AUTO_DELETE_TIME = 10 * time.Second
@@ -46,9 +48,18 @@ func LoadEnv() *Settings {
 		log.Log.Fatalf("unable to load settings.json file")
 	}
 	log.Log.Println(settings)
-	settings.FetchSource = &model.FetchSource{
-		Url:  fmt.Sprintf(IPhoneProUrl, settings.Stores[0]),
-		Type: IPhoneProModelList,
+
+	fetchUrl := fmt.Sprintf(IPhoneUrl, settings.Stores[0])
+	exactlyMode := len(settings.Models) > 0
+	if exactlyMode {
+		fetchUrl = IPhoneModelUrl
+		IPhoneProModelList = settings.Models
 	}
+	fetchSource := &model.FetchSource{
+		Url:         fetchUrl,
+		Type:        IPhoneProModelList,
+		ExactlyMode: exactlyMode,
+	}
+	settings.FetchSource = fetchSource
 	return settings
 }

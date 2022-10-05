@@ -12,7 +12,7 @@ func main() {
 	settings := setting.LoadEnv()
 	b := bot.Init(settings)
 	service.Init(settings)
-	service.Fetch(settings.FetchSource)
+	service.StartFetchAll()
 	service.StartCron(settings.FetchDuration)
 	b.Start()
 }

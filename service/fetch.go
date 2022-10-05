@@ -12,13 +12,14 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 )
 
-var isFetching = false
 var cronTask *cron.Cron
 var storeMap = map[string]model.Store{}
 var _settings *setting.Settings
+var fetchStateMap = sync.Map{}
 
 func Init(settings *setting.Settings) {
 	_settings = settings
@@ -37,18 +38,34 @@ func StartCron(time string) error {
 	cronTask = cron.New()
 	log.Log.Println(fmt.Sprintf("start cron time %s", formatTime))
 	cronTask.AddFunc(formatTime, func() {
-		Fetch(_settings.FetchSource)
+		StartFetchAll()
 	})
 	cronTask.Start()
 	return nil
 }
 
-func Fetch(source *model.FetchSource) {
-	if isFetching {
+func StartFetchAll() {
+	source := _settings.FetchSource
+	if source.ExactlyMode {
+		for _, s := range source.Type {
+			fetchUrl := fmt.Sprintf(source.Url, _settings.Stores[0], s)
+			time.Sleep(800 * time.Millisecond)
+			go Fetch(fetchUrl, s, true)
+		}
+	} else {
+		modelType := source.Type[0]
+		fetchUrl := source.Url + modelType
+		Fetch(fetchUrl, source.Type[0], source.ExactlyMode)
+	}
+}
+
+func Fetch(fetchUrl string, modelType string, exactlyMode bool) {
+	isFetching, ok := fetchStateMap.Load(fetchUrl)
+	if ok && isFetching.(bool) {
 		return
 	}
-	isFetching = true
-	log.Log.Println(fmt.Sprintf("start fetch %v", time.Now().Local()))
+	fetchStateMap.Store(fetchUrl, true)
+	log.Log.Println(fmt.Sprintf("start fetch %v, url: %s", time.Now().Local(), fetchUrl))
 	h := http.DefaultClient
 
 	if len(_settings.Proxy) > 0 {
@@ -62,11 +79,10 @@ func Fetch(source *model.FetchSource) {
 		}
 	}
 	h.Timeout = 2 * time.Second
-	url := source.Url + source.Type[0]
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequest(http.MethodGet, fetchUrl, nil)
 	if err != nil {
 		log.Log.Println(err)
-		isFetching = false
+		fetchStateMap.Store(fetchUrl, false)
 		return
 	}
 	req.Header.Set("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.49 Safari/537.36")
@@ -79,21 +95,28 @@ func Fetch(source *model.FetchSource) {
 	}
 	if err != nil {
 		log.Log.Println(err)
-		isFetching = false
+		fetchStateMap.Store(fetchUrl, false)
 		return
 	}
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Log.Println(err)
-		isFetching = false
+		fetchStateMap.Store(fetchUrl, false)
 		return
 	}
 	log.Log.Println(fmt.Sprintf("status %s, length %d", r.Status, r.ContentLength))
 
 	if r.StatusCode != 200 {
 		//不正常
+		fetchStateMap.Store(fetchUrl, false)
 		return
+	}
+
+	fetchKeys := []string{"body", "PickupMessage", "stores"}
+
+	if exactlyMode {
+		fetchKeys = []string{"body", "content", "pickupMessage", "stores"}
 	}
 
 	jsonparser.ArrayEach(body, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
@@ -125,11 +148,10 @@ func Fetch(source *model.FetchSource) {
 			return
 		}
 		if err != nil || len(partsAvailability) == 2 || len(partsAvailability) == 0 {
-			clearStore(storeNumStr, source.Type)
-			isFetching = false
+			clearStore(storeNumStr, modelType)
 			return
 		}
-		hasModelList := []model.Model{}
+		newModelList := []model.Model{}
 		jsonparser.ObjectEach(value, func(key, value []byte, dataType jsonparser.ValueType, offset int) error {
 			messageValue, _, _, err := jsonparser.Get(value, "messageTypes", "regular")
 			if err != nil {
@@ -155,14 +177,31 @@ func Fetch(source *model.FetchSource) {
 				log.Log.Error(err)
 				return err
 			}
-			model := model.Model{Title: title, StoreNum: storeNumStr, StartTime: time.Now().Local(), Enable: true, ModelName: modelName}
-			hasModelList = append(hasModelList, model)
+
+			// 过滤模型
+			hasModel := false
+			for _, filterModel := range _settings.Models {
+				if filterModel == modelName {
+					hasModel = true
+					break
+				}
+			}
+			if !hasModel {
+				return nil
+			}
+
+			model := model.Model{
+				Title:     title,
+				StoreNum:  storeNumStr,
+				StartTime: time.Now().Local(),
+				Enable:    true,
+				ModelName: modelName}
+			newModelList = append(newModelList, model)
 			return nil
 		}, "partsAvailability")
 
-		if len(hasModelList) == 0 {
-			clearStore(storeNumStr, nil)
-			isFetching = false
+		if len(newModelList) == 0 {
+			clearStore(storeNumStr, modelType)
 			return
 		}
 
@@ -173,12 +212,21 @@ func Fetch(source *model.FetchSource) {
 		if err == nil {
 			//存在list, 进行去重
 			cacheList = store.Models
-			for _, model := range cacheList {
-				if contains(hasModelList, model) {
+			needDeleteList := []model.Model{}
+			for _, cacheModel := range cacheList {
+				if contains(newModelList, cacheModel) {
 					continue
 				}
+				if cacheModel.ModelName != modelType {
+					// 过滤不同机型
+					continue
+				}
+				needDeleteList = append(needDeleteList, cacheModel)
+			}
+
+			for _, cacheModel := range needDeleteList {
 				//删除不包含的
-				cacheList = deleteModel(cacheList, model)
+				cacheList = deleteModel(cacheList, cacheModel)
 			}
 		} else {
 			store = model.Store{}
@@ -186,7 +234,7 @@ func Fetch(source *model.FetchSource) {
 			store.Number = storeNumStr
 			storeMap[storeNumStr] = store
 		}
-		for _, model := range hasModelList {
+		for _, model := range newModelList {
 			if contains(cacheList, model) {
 				continue
 			}
@@ -202,14 +250,14 @@ func Fetch(source *model.FetchSource) {
 		}
 		store.Models = cacheList
 		storeMap[storeNumStr] = store
-	}, "body", "PickupMessage", "stores")
+	}, fetchKeys...)
 
-	isFetching = false
+	fetchStateMap.Store(fetchUrl, false)
 }
 
 func deleteModel(list []model.Model, model model.Model) []model.Model {
 	for i, m := range list {
-		if m.Title == model.Title && m.Enable == model.Enable {
+		if isTheSameModel(m, model) {
 			store, err := findStore(model.StoreNum)
 			//从store中删除
 			if err == nil {
@@ -226,16 +274,20 @@ func deleteModel(list []model.Model, model model.Model) []model.Model {
 
 func deleteFromList(list []model.Model, model model.Model) []model.Model {
 	for i, m := range list {
-		if m.Title == model.Title {
+		if isTheSameModel(m, model) {
 			return append(list[:i], list[i+1:]...)
 		}
 	}
 	return list
 }
 
+func isTheSameModel(m model.Model, model model.Model) bool {
+	return m.Title == model.Title && m.ModelName == model.ModelName && m.StoreNum == model.StoreNum
+}
+
 func contains(list []model.Model, model model.Model) bool {
 	for _, a := range list {
-		if a.Title == model.Title && a.Enable == model.Enable {
+		if isTheSameModel(a, model) {
 			return true
 		}
 	}

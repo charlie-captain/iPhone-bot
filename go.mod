@@ -12,4 +12,7 @@ require (
 	gopkg.in/tucnak/telebot.v3 v3.0.0-20211015201320-13d54ae7338e
 )
 
-require golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
+require (
+	github.com/google/uuid v1.3.0 // indirect
+	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
+)

@@ -98,7 +98,7 @@ func getUnavailableStr(model model.Model, store model.Store) string {
 }
 
 func getClickableStr(modelType string, content string) string {
-	url := setting.IPhoneProBuyUrl + setting.CurIPhone + "/" + modelType
+	url := setting.IPhoneBuyUrl + setting.CurIPhone + "/" + modelType
 	return fmt.Sprintf("[%s](%s)", content, url)
 }
 
