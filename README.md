@@ -1,5 +1,7 @@
 # iPhone Bot
 
+[English](./README_EN.md)
+
 iPhone Pro Telegram Bot, 默认城市 GuangZhou.
 
 ## Usage
