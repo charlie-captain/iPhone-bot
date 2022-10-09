@@ -1,5 +1,7 @@
 # iPhone Bot
 
+[中文](./README.md)
+
 iPhone Pro Telegram Bot, Default city is GuangZhou.
 
 ## Usage
