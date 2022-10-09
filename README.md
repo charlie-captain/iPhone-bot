@@ -11,7 +11,7 @@ iPhone Pro Telegram Bot, 默认城市 GuangZhou.
   # 机器人TOKEN
   "bot_token": "",
   
-  # 聊天id
+  # 聊天id, 自己的id或者群聊
   "chat_id": 00000000,
   
   # 店铺代号, 从根目录store.json查找, 最好是临近的店铺
@@ -29,7 +29,10 @@ iPhone Pro Telegram Bot, 默认城市 GuangZhou.
   "fetch_duration": "3s",
   
   # 代理地址:端口(例 http://127.0.0.1:7890), 默认为系统代理
-  "proxy": ""
+  "proxy": "",
+  
+  # 地区(默认中国), 例如https://www.apple.com/hk/ 输入 hk 即可, 后续会改成机器人配置
+  "region": "",
 }
 ```
 
@@ -48,3 +51,13 @@ linux/Mac 运行 iphoneBot, 需要命令行设置权限 chmod +x ./iphoneBot
 chmod +777 ./run_docker.sh 
 ./run_docker.sh
 ```
+
+## Dev
+
+1. clone 项目
+2. 改动代码
+3. 运行 command/build.sh
+
+## 声明
+
+本项目仅供学习使用, 不能用于商业非法等用途, 本人不承担任何法律责任

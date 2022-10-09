@@ -1,7 +1,7 @@
 FROM alpine
 
 WORKDIR /iPhone
-COPY . .
+COPY .. .
 
 RUN chmod 777 ./iphoneBot
 

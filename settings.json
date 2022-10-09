@@ -8,5 +8,6 @@
   "model_list": [
   ],
   "fetch_duration": "3s",
-  "proxy": ""
+  "proxy": "",
+  "region": ""
 }

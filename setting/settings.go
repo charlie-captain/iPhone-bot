@@ -17,11 +17,14 @@ type Settings struct {
 	Proxy         string             `json:"proxy"`
 	FetchSource   *model.FetchSource `json:"-"`
 	Models        []string           `json:"model_list"`
+	Region        string             `json:"region"`
 }
 
-const IPhoneUrl = "https://www.apple.com.cn/shop/pickup-message-recommendations?t=compact&searchNearby=true&store=%s&product="
-const IPhoneModelUrl = "https://www.apple.com.cn/shop/fulfillment-messages?store=%s&little=false&parts.0=%s&mts.0=regular&mts.1=sticky&fts=true&searchNearby=true"
-const IPhoneBuyUrl = "https://www.apple.com.cn/shop/buy-iphone/"
+var Host = "https://www.apple.com"
+
+const RecommendUrlSuffix = "/shop/pickup-message-recommendations?t=compact&searchNearby=true&store=%s&product="
+const IPhoneModelSuffix = "/shop/fulfillment-messages?store=%s&little=false&parts.0=%s&mts.0=regular&mts.1=sticky&fts=true&searchNearby=true"
+const IPhoneBuySuffix = "/shop/buy-iphone/"
 const CurIPhone = "iphone-14-pro"
 
 const AUTO_DELETE_TIME = 10 * time.Second
@@ -47,16 +50,25 @@ func LoadEnv() *Settings {
 	if err != nil {
 		log.Log.Fatalf("unable to load settings.json file")
 	}
-	log.Log.Println(settings)
+	//log.Log.Println(settings)
+	if len(settings.Stores) == 0 {
+		log.Log.Fatal("store must not be empty")
+	}
 
-	fetchUrl := fmt.Sprintf(IPhoneUrl, settings.Stores[0])
+	if settings.Region == "" {
+		//默认中国
+		Host = Host + ".cn"
+	} else if len(settings.Region) > 0 {
+		Host = Host + "/" + settings.Region
+	}
+	fetchSuffix := fmt.Sprintf(RecommendUrlSuffix, settings.Stores[0])
 	exactlyMode := len(settings.Models) > 0
 	if exactlyMode {
-		fetchUrl = IPhoneModelUrl
+		fetchSuffix = IPhoneModelSuffix
 		IPhoneProModelList = settings.Models
 	}
 	fetchSource := &model.FetchSource{
-		Url:         fetchUrl,
+		Url:         Host + fetchSuffix,
 		Type:        IPhoneProModelList,
 		ExactlyMode: exactlyMode,
 	}
