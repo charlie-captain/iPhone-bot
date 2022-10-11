@@ -33,7 +33,7 @@ iPhone Pro Telegram Bot, 默认城市 GuangZhou.
   # 代理地址:端口(例 http://127.0.0.1:7890), 默认为系统代理
   "proxy": "",
   
-  # 地区(默认中国), 例如https://www.apple.com/hk/ 输入 hk 即可, 后续会改成机器人配置
+  # 地区(默认中国内地), 例如 中国香港 https://www.apple.com/hk/ 输入 hk 即可, 后续会改成机器人配置
   "region": "",
 }
 ```
