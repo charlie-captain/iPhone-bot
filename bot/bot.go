@@ -2,7 +2,7 @@ package bot
 
 import (
 	"fmt"
-	tb "gopkg.in/tucnak/telebot.v3"
+	tb "gopkg.in/telebot.v3"
 	"iphoneBot/log"
 	"iphoneBot/model"
 	"iphoneBot/setting"
@@ -14,7 +14,7 @@ var bot *tb.Bot
 
 func Init(settings *setting.Settings) *tb.Bot {
 	client := http.DefaultClient
-	client.Timeout = 10 * time.Second
+	client.Timeout = time.Minute
 	setting.SetUpProxy(settings, client)
 	b, err := tb.NewBot(tb.Settings{
 		Token:   settings.BotToken,
