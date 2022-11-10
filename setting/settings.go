@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"iphoneBot/log"
 	"iphoneBot/model"
+	"net/http"
+	"net/url"
 	"os"
 	"time"
 )
@@ -74,4 +76,18 @@ func LoadEnv() *Settings {
 	}
 	settings.FetchSource = fetchSource
 	return settings
+}
+
+func SetUpProxy(settings *Settings, h *http.Client) bool {
+	if len(settings.Proxy) > 0 {
+		proxyUrl, err := url.Parse(settings.Proxy)
+		if err != nil {
+			log.Log.Error(err)
+			return true
+		}
+		h.Transport = &http.Transport{
+			Proxy: http.ProxyURL(proxyUrl),
+		}
+	}
+	return false
 }

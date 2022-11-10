@@ -27,7 +27,7 @@ iPhone Pro Telegram Bot, 默认城市 GuangZhou.
     
   ],
   
-  # 查询间隔时间 3s/1min/1h
+  # 查询间隔时间 3s/1m/1h
   "fetch_duration": "3s",
   
   # 代理地址:端口(例 http://127.0.0.1:7890), 默认为系统代理

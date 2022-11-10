@@ -27,7 +27,7 @@ iPhone Pro Telegram Bot, Default city is GuangZhou.
     
   ],
   
-  # fetch duration: 3s/1min/1h
+  # fetch duration: 3s/1m/1h
   "fetch_duration": "3s",
   
   # proxy:port(http://127.0.0.1:7890), default system proxy

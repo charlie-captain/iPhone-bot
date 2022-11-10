@@ -10,7 +10,6 @@ import (
 	"iphoneBot/model"
 	"iphoneBot/setting"
 	"net/http"
-	"net/url"
 	"strings"
 	"sync"
 	"time"
@@ -68,15 +67,8 @@ func Fetch(fetchUrl string, modelType string, exactlyMode bool) {
 	log.Log.Println(fmt.Sprintf("start fetch %v, url: %s", time.Now().Local(), fetchUrl))
 	h := http.DefaultClient
 
-	if len(_settings.Proxy) > 0 {
-		proxyUrl, err := url.Parse(_settings.Proxy)
-		if err != nil {
-			log.Log.Error(err)
-			return
-		}
-		h.Transport = &http.Transport{
-			Proxy: http.ProxyURL(proxyUrl),
-		}
+	if setting.SetUpProxy(_settings, h) {
+		return
 	}
 	h.Timeout = 2 * time.Second
 	req, err := http.NewRequest(http.MethodGet, fetchUrl, nil)

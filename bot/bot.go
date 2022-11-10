@@ -6,16 +6,21 @@ import (
 	"iphoneBot/log"
 	"iphoneBot/model"
 	"iphoneBot/setting"
+	"net/http"
 	"time"
 )
 
 var bot *tb.Bot
 
 func Init(settings *setting.Settings) *tb.Bot {
+	client := http.DefaultClient
+	client.Timeout = 10 * time.Second
+	setting.SetUpProxy(settings, client)
 	b, err := tb.NewBot(tb.Settings{
 		Token:   settings.BotToken,
 		Poller:  &tb.LongPoller{Timeout: 10 * time.Second},
-		Verbose: false})
+		Verbose: true,
+		Client:  client})
 
 	if err != nil {
 		fmt.Println("error " + err.Error())
