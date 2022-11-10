@@ -19,7 +19,7 @@ func Init(settings *setting.Settings) *tb.Bot {
 	b, err := tb.NewBot(tb.Settings{
 		Token:   settings.BotToken,
 		Poller:  &tb.LongPoller{Timeout: 10 * time.Second},
-		Verbose: true,
+		Verbose: false,
 		Client:  client})
 
 	if err != nil {
