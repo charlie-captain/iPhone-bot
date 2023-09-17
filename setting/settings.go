@@ -27,13 +27,13 @@ var Host = "https://www.apple.com"
 const RecommendUrlSuffix = "/shop/pickup-message-recommendations?t=compact&searchNearby=true&store=%s&product="
 const IPhoneModelSuffix = "/shop/fulfillment-messages?store=%s&little=false&parts.0=%s&mts.0=regular&mts.1=sticky&fts=true&searchNearby=true"
 const IPhoneBuySuffix = "/shop/buy-iphone/"
-const CurIPhone = "iphone-14-pro"
+const CurIPhone = "iphone-15-pro"
 
 const AUTO_DELETE_TIME = 10 * time.Second
 
-// iPhone14 Pro 灰色
+// iPhone15 Pro
 var IPhoneProModelList = []string{
-	"MQ1C3CH/A", //256G
+	"MTQJ3CH/A", //1T pro
 }
 
 func LoadEnv() *Settings {
