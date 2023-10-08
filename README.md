@@ -34,6 +34,7 @@ iPhone Pro Telegram Bot, 默认城市 GuangZhou.
   "proxy": "",
   
   # 地区(默认中国内地), 例如 中国香港 https://www.apple.com/hk/ 输入 hk 即可, 后续会改成机器人配置
+  # 美国用 us
   "region": "",
 }
 ```

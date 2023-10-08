@@ -61,7 +61,9 @@ func LoadEnv() *Settings {
 		//默认中国
 		Host = Host + ".cn"
 	} else if len(settings.Region) > 0 {
-		Host = Host + "/" + settings.Region
+		if settings.Region != "us" {
+			Host = Host + "/" + settings.Region
+		}
 	}
 	fetchSuffix := fmt.Sprintf(RecommendUrlSuffix, settings.Stores[0])
 	exactlyMode := len(settings.Models) > 0
