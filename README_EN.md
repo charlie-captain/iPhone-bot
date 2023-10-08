@@ -34,6 +34,7 @@ iPhone Pro Telegram Bot, Default city is GuangZhou.
   "proxy": "",
   
   # region(default cn), example:: "https://www.apple.com/hk/", so input "hk"
+  # United States use "us"
   "region": "",
 }
 ```
